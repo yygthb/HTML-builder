@@ -2,8 +2,10 @@ const path = require('path');
 const fs = require('fs');
 
 const DIR_STYLES = 'styles';
+const DIR_PATH_STYLES = path.resolve(__dirname, DIR_STYLES);
 const DIR_DIST = 'project-dist';
-const BUNDLE_FILE = 'bundle.css';
+const FILE_BUNDLE = 'bundle.css';
+const FILE_PATH_BUNDLE = path.resolve(__dirname, DIR_DIST, FILE_BUNDLE);
 
 const createBundleFile = (filePath) => {
   return new Promise((res, rej) => {
@@ -16,7 +18,7 @@ const createBundleFile = (filePath) => {
   });
 };
 
-const isFileFunc = (filePath) => {
+const isFile = (filePath) => {
   return new Promise((res, rej) => {
     fs.lstat(filePath, (err, stats) => {
       if (err) rej(err);
@@ -28,21 +30,20 @@ const isFileFunc = (filePath) => {
 
 const isCssExt = (filePath) => {
   const fileExt = path.parse(filePath).ext;
-
   return fileExt.slice(1) === 'css';
 };
 
-const getCssFiles = (dirPath) => {
+const getCssFiles = (src) => {
   return new Promise((res, rej) => {
-    fs.readdir(dirPath, { encoding: 'utf-8' }, async (err, files) => {
+    fs.readdir(src, { encoding: 'utf-8' }, async (err, files) => {
       if (err) rej(err);
 
       const cssFiles = [];
       for (let file of files) {
-        const filePath = path.resolve(dirPath, file);
-        const isFile = await isFileFunc(filePath);
+        const filePath = path.resolve(src, file);
+        const _isFile = await isFile(filePath);
 
-        if (isFile && isCssExt(filePath)) {
+        if (_isFile && isCssExt(filePath)) {
           cssFiles.push(file);
         }
       }
@@ -52,10 +53,10 @@ const getCssFiles = (dirPath) => {
   });
 };
 
-const readFileData = (filePath) => {
+const readFileData = (src) => {
   return new Promise((res, rej) => {
     const data = [];
-    const stream = fs.createReadStream(filePath, { encoding: 'utf-8' });
+    const stream = fs.createReadStream(src, { encoding: 'utf-8' });
 
     stream.on('data', (chunk) => data.push(chunk));
     stream.on('end', () => res(data.join('')));
@@ -74,22 +75,20 @@ const writeCssBundle = async (cssFiles, dirAssets, filePath) => {
   wr.end();
 };
 
-const mergeStyles = async (dirAssets, dirDist, bundleName) => {
+const mergeStyles = async (src, dist) => {
   try {
-    const bundlePath = path.resolve(__dirname, dirDist, bundleName);
-    await createBundleFile(bundlePath);
+    await createBundleFile(dist);
 
-    const stylesPath = path.resolve(__dirname, dirAssets);
-    const cssFiles = await getCssFiles(stylesPath);
+    const cssFiles = await getCssFiles(src);
 
     await writeCssBundle(
       cssFiles,
-      path.resolve(__dirname, dirAssets),
-      path.resolve(__dirname, dirDist, bundleName)
+      src,
+      dist
     );
   } catch (error) {
     throw new Error(error);
   }
 };
 
-mergeStyles(DIR_STYLES, DIR_DIST, BUNDLE_FILE);
+mergeStyles(DIR_PATH_STYLES, FILE_PATH_BUNDLE);

@@ -3,17 +3,17 @@ const fs = require('fs');
 
 const DIR_NAME_ORIGINAL = 'files';
 
-const removeDir = (path) => {
-  return new Promise((res, rej) => {
-    fs.rm(path, { recursive: true }, () => {
+const removeDir = (src) => {
+  return new Promise((res) => {
+    fs.rm(src, { recursive: true }, () => {
       res();
     });
   });
 };
 
-const createDir = (path) => {
+const createDir = (src) => {
   return new Promise((res, rej) => {
-    fs.mkdir(path, (err) => {
+    fs.mkdir(src, (err) => {
       if (err) rej(err);
 
       res();
@@ -21,9 +21,9 @@ const createDir = (path) => {
   });
 };
 
-const getDirFiles = (path) => {
+const getDirFiles = (src) => {
   return new Promise((res, rej) => {
-    fs.readdir(path, { encoding: 'utf-8' }, (err, files) => {
+    fs.readdir(src, { encoding: 'utf-8' }, (err, files) => {
       if (err) rej(err);
 
       res(files);
@@ -31,9 +31,9 @@ const getDirFiles = (path) => {
   });
 };
 
-const copyFile = (src, dest) => {
+const copyFile = (src, dist) => {
   return new Promise((res, rej) => {
-    fs.copyFile(src, dest, (err) => {
+    fs.copyFile(src, dist, (err) => {
       if (err) rej(err);
 
       res();
@@ -41,9 +41,9 @@ const copyFile = (src, dest) => {
   });
 };
 
-const copyDir = async (dirName) => {
+const copyDir = async (dirSrc) => {
   try {
-    const DIR_NAME_COPY = dirName + '-copy';
+    const DIR_NAME_COPY = dirSrc + '-copy';
     const DIR_PATH_ORIGINAL = path.resolve(__dirname, DIR_NAME_ORIGINAL);
     const DIR_PATH_COPY = path.resolve(__dirname, DIR_NAME_COPY);
 
@@ -59,7 +59,6 @@ const copyDir = async (dirName) => {
       );
     }
   } catch (error) {
-    console.log('error: ', error);
     throw new Error(error);
   }
 };

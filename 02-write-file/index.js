@@ -5,9 +5,9 @@ const readline = require('readline');
 const FILE_NAME = 'text.txt';
 const FILE_PATH = path.resolve(__dirname, FILE_NAME);
 
-const createFile = (filePath) => {
+const createFile = (src) => {
   return new Promise((res, rej) => {
-    fs.writeFile(filePath, '', (err) => {
+    fs.writeFile(src, '', (err) => {
       if (err) {
         rej(err);
       }
@@ -16,9 +16,9 @@ const createFile = (filePath) => {
   });
 };
 
-const writeStream = (filePath) => {
+const writeStream = (src) => {
   return new Promise((res, rej) => {
-    const write = fs.createWriteStream(filePath);
+    const write = fs.createWriteStream(src);
     write.on('error', (err) => rej(err));
     res(write);
   });
@@ -32,7 +32,7 @@ const showStartInfoMsg = () => {
 };
 const showFinallyInfoMsg = () => {
   console.log('');
-  console.log('||  the application closed');
+  console.log('||  the app closed');
 };
 
 const rl = readline.createInterface({
@@ -47,7 +47,7 @@ const run = async (filePath) => {
 
     rl.prompt();
     process.stdout.write('\n');
-    const wr = await writeStream(filePath);
+    const write = await writeStream(filePath);
 
     process.on('SIGINT', () => {
       rl.close();
@@ -57,12 +57,12 @@ const run = async (filePath) => {
       if (data === 'exit') {
         return rl.close();
       }
-      wr.write(data + '\n');
+      write.write(data + '\n');
     });
 
     rl.on('close', () => {
-      wr.end();
-      wr.on('finish', () => {
+      write.end();
+      write.on('finish', () => {
         showFinallyInfoMsg();
       });
     });
